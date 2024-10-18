@@ -20,12 +20,11 @@ jobs:
     - name: Install dependencies
       run: |
         npm install
-        npm install patch-package --save-dev  # Ensure patch-package is installed
         npm install -g react-native-cli
         cd ios
         pod install
 
-    - name: Set up Ruby and Install Gems
+    - name: Set up Ruby and Install Fastlane
       run: |
         cd ios
         gem install bundler
@@ -33,7 +32,7 @@ jobs:
 
     - name: Build iOS with Fastlane
       env:
-        APP_STORE_CONNECT_PASSWORD: ${{ secrets.APP_STORE_CONNECT_PASSWORD }}  # App-specific password for Apple ID
+        APP_STORE_CONNECT_PASSWORD: ${{ secrets.APP_STORE_CONNECT_PASSWORD }}
       run: |
         cd ios
         bundle exec fastlane ios build

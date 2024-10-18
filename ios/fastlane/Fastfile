@@ -1,16 +1,15 @@
 platform :ios do
     desc "Build the iOS app for physical devices"
     lane :build do
-      build_ios_app(
-        workspace: "AppCheck.xcworkspace",  # Replace with your workspace name
-        scheme: "AppCheckGit",                 # Replace with your scheme name
-        export_method: "development",              # Set to development, ad-hoc, or app-store
-        output_directory: "./build",               # Directory for the generated IPA
-        export_options: {
-          signingStyle: "automatic",               # Automatically manage code signing
-          teamID: "HR7RS84V6F"                   # Your Apple Developer Team ID
-        }
-      )
+        build_ios_app(
+            workspace: "AppCheck.xcworkspace",
+            scheme: "AppCheckGit",
+            export_method: "development",   # or "ad-hoc", "app-store" depending on your use case
+            output_directory: "./build",
+            codesigning_identity: "iPhone Developer",
+            export_team_id: "HR7RS84V6F",   # Your team ID
+            automatic_code_signing: true    # Enables automatic code signing
+        )
     end
   end
   
