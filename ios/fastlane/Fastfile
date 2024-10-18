@@ -3,16 +3,16 @@ platform :ios do
     lane :build do
       update_code_signing_settings( 
         use_automatic_signing: true,
-        team_id: "HR7RS84V6F"
+        team_id: "HR7RS84V6F"  # Replace with your team ID
       )
-      
+  
       build_ios_app(
-        workspace: "AppCheck.xcworkspace",  # Correct workspace file
-        scheme: "AppCheck",  # Use the scheme name without '.xcscheme'
+        workspace: "AppCheck.xcworkspace",
+        scheme: "AppCheck",
         export_method: "development",
         output_directory: "./build",
         codesigning_identity: "iPhone Developer",
-        export_team_id: "HR7RS84V6F"
+        export_team_id: "HR7RS84V6F"  # Ensure this matches your team ID
       )
     end
   end
