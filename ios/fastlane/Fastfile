@@ -2,7 +2,7 @@ platform :ios do
     desc "Build the iOS app for physical devices"
     lane :build do
       build_ios_app(
-        workspace: "AppCheckGit",  # Replace with your workspace name
+        workspace: "AppCheck.xcworkspace",  # Replace with your workspace name
         scheme: "AppCheckGit",                 # Replace with your scheme name
         export_method: "development",              # Set to development, ad-hoc, or app-store
         output_directory: "./build",               # Directory for the generated IPA
