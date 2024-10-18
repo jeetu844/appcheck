@@ -20,6 +20,7 @@ jobs:
     - name: Install dependencies
       run: |
         npm install
+        npm install patch-package --save-dev  # Ensure patch-package is installed
         npm install -g react-native-cli
         cd ios
         pod install
