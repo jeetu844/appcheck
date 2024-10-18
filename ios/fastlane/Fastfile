@@ -8,7 +8,7 @@ platform :ios do
       
       build_ios_app(
         workspace: "AppCheck.xcworkspace",
-        scheme: "AppCheckGit",
+        scheme: "AppCheck.xcscheme",
         export_method: "development",   # Adjust depending on your use case
         output_directory: "./build",
         codesigning_identity: "iPhone Developer",
