@@ -1,0 +1,16 @@
+platform :ios do
+    desc "Build the iOS app for physical devices"
+    lane :build do
+      build_ios_app(
+        workspace: "MySampleProject.xcworkspace",  # Replace with your workspace name
+        scheme: "MySampleProject",                 # Replace with your scheme name
+        export_method: "development",              # Set to development, ad-hoc, or app-store
+        output_directory: "./build",               # Directory for the generated IPA
+        export_options: {
+          signingStyle: "automatic",               # Automatically manage code signing
+          teamID: "HR7RS84V6F"                   # Your Apple Developer Team ID
+        }
+      )
+    end
+  end
+  
