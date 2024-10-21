@@ -30,10 +30,13 @@ jobs:
         gem install bundler
         bundle install
 
-    - name: Update Version and Build IPA with Fastlane
+    - name: Authenticate with App Store Connect API
       env:
-        APP_STORE_CONNECT_PASSWORD: ${{ secrets.APP_STORE_CONNECT_PASSWORD }}
+        APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+        APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
       run: |
+        fastlane run app_store_connect_api_key
         bundle exec fastlane update_version
         bundle exec fastlane build_ipa
 

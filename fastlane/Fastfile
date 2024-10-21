@@ -6,22 +6,26 @@ before_all do
 end
 
 platform :ios do
-  desc "Increment build number and version"
-  lane :update_version do
-    # Fetch the current app store version
-    app_store_version = get_app_store_version_number(bundle_id: "HR7RS84V6F.com.appchekongit")
-    # Get the current plist version
-    plist_version = get_version_number_from_plist(xcodeproj: './ios/AppCheck.xcodeproj')
-
-    # Compare versions and bump minor or patch accordingly
-    if Gem::Version.new(plist_version.to_f) == Gem::Version.new(app_store_version.to_f)
-      UI.message "Bumping minor version"
-      increment_version_number_in_plist(xcodeproj: './ios/AppCheck.xcodeproj', bump_type: 'minor')
-    else
-      UI.message "Bumping patch version"
-      increment_version_number_in_plist(xcodeproj: './ios/AppCheck.xcodeproj', bump_type: 'patch')
+    desc "Increment build number and version"
+    lane :update_version do
+      # Fetch the current app store version
+      app_store_version = app_store_build_number(
+        app_identifier: "HR7RS84V6F.com.appchekongit",
+        version: "latest",
+        platform: "ios"
+      )
+      # Get the current plist version
+      plist_version = get_version_number_from_plist(xcodeproj: './ios/AppCheck.xcodeproj')
+    
+      # Compare versions and bump minor or patch accordingly
+      if Gem::Version.new(plist_version.to_f) == Gem::Version.new(app_store_version.to_f)
+        UI.message "Bumping minor version"
+        increment_version_number_in_plist(xcodeproj: './ios/AppCheck.xcodeproj', bump_type: 'minor')
+      else
+        UI.message "Bumping patch version"
+        increment_version_number_in_plist(xcodeproj: './ios/AppCheck.xcodeproj', bump_type: 'patch')
+      end
     end
-  end
 
   desc "Build the .ipa only"
   lane :build_ipa do
