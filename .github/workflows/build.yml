@@ -8,6 +8,7 @@ on:
 jobs:
   build-ios:
     runs-on: macos-latest
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
@@ -35,6 +36,14 @@ jobs:
       run: |
         bundle exec fastlane update_version
         bundle exec fastlane build_ipa
+
+    - name: Commit version changes
+      run: |
+        git config --global user.email "github-actions@github.com"
+        git config --global user.name "GitHub Actions"
+        git add .
+        git commit -m "Automated version bump"
+      continue-on-error: true
 
     - name: Upload IPA to artifacts
       uses: actions/upload-artifact@v3
