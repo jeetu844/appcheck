@@ -1,44 +1,40 @@
 default_platform(:ios)
 
 before_all do
-  # ensure_git_status_clean # Commented out to bypass the clean state check
+  # You can remove this check if you want to bypass the Git status check
+  # ensure_git_status_clean
   git_pull # Pull the latest code
 end
 
 platform :ios do
-    desc "Increment build number and version"
-    lane :update_version do
-      # Fetch the current app store version
-      app_store_version = app_store_build_number(
-        app_identifier: "HR7RS84V6F.com.appchekongit",
-        version: "latest",
-        platform: "ios"
-      )
-      # Get the current plist version
-      plist_version = get_version_number_from_plist(xcodeproj: './ios/AppCheck.xcodeproj')
-    
-      # Compare versions and bump minor or patch accordingly
-      if Gem::Version.new(plist_version.to_f) == Gem::Version.new(app_store_version.to_f)
-        UI.message "Bumping minor version"
-        increment_version_number_in_plist(xcodeproj: './ios/AppCheck.xcodeproj', bump_type: 'minor')
-      else
-        UI.message "Bumping patch version"
-        increment_version_number_in_plist(xcodeproj: './ios/AppCheck.xcodeproj', bump_type: 'patch')
-      end
-    end
+  desc "Increment build number and version"
+  lane :update_version do
+    plist_version = get_version_number_from_plist(xcodeproj: './ios/AppCheck.xcodeproj')
+    UI.message "Bumping patch version"
+    increment_version_number_in_plist(xcodeproj: './ios/AppCheck.xcodeproj', bump_type: 'patch')
+  end
 
-  desc "Build the .ipa only"
+  desc "Build the .ipa only with manual code signing"
   lane :build_ipa do
     # Increment the build number
     increment_build_number(xcodeproj: './ios/AppCheck.xcodeproj')
 
-    # Build the .ipa using Gym
+    # Build the .ipa using Gym with manual code signing
     gym(
       workspace: './ios/AppCheck.xcworkspace', # Path to your Xcode workspace
       scheme: 'AppCheck', # Your app's scheme
-      export_method: 'app-store', # Method for app distribution (e.g., app-store, ad-hoc, enterprise)
+      export_method: 'app-store', # Method for app distribution (app-store, ad-hoc, enterprise)
       output_directory: './build', # Output directory for the .ipa
-      output_name: 'AppCheck.ipa' # Name of the generated .ipa file
+      output_name: 'AppCheck.ipa', # Name of the generated .ipa file
+      codesigning_identity: "iPhone Distribution: HR7RS84V6F", # Team ID
+      provisioning_profile_path: "./AppCheckGit_Dis.mobileprovision", # Path to your provisioning profile
+      export_options: {
+        provisioningProfiles: {
+          "HR7RS84V6F.com.appchekongit" => "AppCheckGit_Dis" # Bundle identifier and provisioning profile name
+        },
+        team_id: "HR7RS84V6F", # Team ID
+        signingStyle: "manual"
+      }
     )
   end
 end

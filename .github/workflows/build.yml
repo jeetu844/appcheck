@@ -30,13 +30,13 @@ jobs:
         gem install bundler
         bundle install
 
-    - name: Authenticate with App Store Connect API
-      env:
-        APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
-        APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
-        APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+    - name: Install Certificates
       run: |
-        fastlane run app_store_connect_api_key
+        security import AppCheckGit_Dis.p12 -k ~/Library/Keychains/login.keychain-db -P intel123 -T /usr/bin/codesign
+        security import AppCheckGit_Dev.p12 -k ~/Library/Keychains/login.keychain-db -P intel123 -T /usr/bin/codesign
+
+    - name: Update Version and Build IPA with Fastlane
+      run: |
         bundle exec fastlane update_version
         bundle exec fastlane build_ipa
 
