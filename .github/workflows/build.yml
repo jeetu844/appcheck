@@ -30,10 +30,13 @@ jobs:
         gem install bundler
         bundle install
 
-    - name: Install Certificates
+    - name: Decode and Install Certificates
       run: |
+        echo "${{ secrets.P12_DIS_BASE64 }}" | base64 --decode > AppCheckGit_Dis.p12
+        echo "${{ secrets.P12_DEV_BASE64 }}" | base64 --decode > AppCheckGit_Dev.p12
         security import AppCheckGit_Dis.p12 -k ~/Library/Keychains/login.keychain-db -P intel123 -T /usr/bin/codesign
         security import AppCheckGit_Dev.p12 -k ~/Library/Keychains/login.keychain-db -P intel123 -T /usr/bin/codesign
+      shell: bash
 
     - name: Update Version and Build IPA with Fastlane
       run: |
