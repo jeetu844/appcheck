@@ -1,0 +1,40 @@
+default_platform(:ios)
+
+before_all do
+  ensure_git_status_clean # Ensure no uncommitted changes
+  git_pull # Pull the latest code
+end
+
+platform :ios do
+  desc "Increment build number and version"
+  lane :update_version do
+    # Fetch the current app store version
+    app_store_version = get_app_store_version_number(bundle_id: "HR7RS84V6F.com.appchekongit")
+    # Get the current plist version
+    plist_version = get_version_number_from_plist(xcodeproj: './ios/AppCheck.xcodeproj')
+
+    # Compare versions and bump minor or patch accordingly
+    if Gem::Version.new(plist_version.to_f) == Gem::Version.new(app_store_version.to_f)
+      UI.message "Bumping minor version"
+      increment_version_number_in_plist(xcodeproj: './ios/AppCheck.xcodeproj', bump_type: 'minor')
+    else
+      UI.message "Bumping patch version"
+      increment_version_number_in_plist(xcodeproj: './ios/AppCheck.xcodeproj', bump_type: 'patch')
+    end
+  end
+
+  desc "Build the .ipa only"
+  lane :build_ipa do
+    # Increment the build number if necessary
+    increment_build_number_in_plist(xcodeproj: './ios/AppCheck.xcodeproj', target: 'AppCheck')
+
+    # Build the .ipa using Gym
+    gym(
+      workspace: './ios/AppCheck.xcworkspace', # Path to your Xcode workspace
+      scheme: 'AppCheck', # Your app's scheme
+      export_method: 'app-store', # Method for app distribution (e.g., app-store, ad-hoc, enterprise)
+      output_directory: './build', # Output directory for the .ipa
+      output_name: 'AppCheck.ipa' # Name of the generated .ipa file
+    )
+  end
+end
