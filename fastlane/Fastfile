@@ -12,7 +12,8 @@ platform :ios do
       configuration: "Release",
       export_method: "app-store",
       output_directory: "./build",
-      output_name: "AppCheck.ipa"
+      output_name: "AppCheck.ipa",
+      xcargs: "-verbose"
     )
 
     # Upload to TestFlight
