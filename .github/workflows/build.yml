@@ -24,15 +24,6 @@ jobs:
         cd ios
         pod install
 
-    - name: Clean Xcode build
-      run: |
-        cd ios
-        xcodebuild clean -workspace AppCheck.xcworkspace -scheme AppCheck
-
-    - name: Bundle React Native code
-      run: |
-        npx react-native bundle --platform ios --dev false --entry-file index.js --bundle-output ios/main.jsbundle --assets-dest ios
-
     - name: Decrypt and install certificates and provisioning profiles
       run: |
         echo ${{ secrets.DEV_P12_BASE64 }} | base64 --decode > AppCheckGit_Dev.p12
