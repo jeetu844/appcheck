@@ -51,8 +51,7 @@ jobs:
 
     - name: Build and Upload to TestFlight
       env:
-        APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
-        APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
-        APP_STORE_CONNECT_P8_KEY: ${{ secrets.APP_STORE_CONNECT_P8_KEY }}
+        APP_STORE_CONNECT_USERNAME: ${{ secrets.APP_STORE_CONNECT_USERNAME }}
+        APP_IDENTIFIER: ${{ secrets.APP_IDENTIFIER }}
       run: |
         bundle exec fastlane ios build_and_upload_to_testflight

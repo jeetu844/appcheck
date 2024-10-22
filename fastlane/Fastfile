@@ -3,18 +3,21 @@ default_platform(:ios)
 platform :ios do
   desc "Build and upload to TestFlight"
   lane :build_and_upload_to_testflight do
-    match(type: "appstore") # Use match or other Fastlane code signing methods
+    # No need to use `match`, using local provisioning profiles and certificates instead
 
     # Build the app using Gym
     gym(
-      workspace: "./ios/AppCheck.xcworkspace",
-      scheme: "AppCheck",
-      export_method: "app-store",
-      output_directory: "./build",
-      output_name: "AppCheck.ipa"
+      workspace: "./ios/AppCheck.xcworkspace", # Path to your Xcode workspace
+      scheme: "AppCheck",                      # Your app's scheme
+      export_method: "app-store",              # Export method (app-store, ad-hoc, etc.)
+      output_directory: "./build",             # Output directory for the IPA
+      output_name: "AppCheck.ipa"              # Name of the generated IPA
     )
 
-    # Upload to TestFlight
-    upload_to_testflight
+    # Upload the build to TestFlight
+    upload_to_testflight(
+      username: ENV['ninehtz@gmail.com'], # Your Apple ID username for App Store Connect
+      app_identifier: ENV['HR7RS84V6F.com.appchekongit']        # Your app bundle ID
+    )
   end
 end
