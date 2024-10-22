@@ -1,4 +1,4 @@
-name: Upload iOS Build to TestFlight
+name: iOS and Android CI
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - master
 
 jobs:
-  build-and-upload:
+  build:
     runs-on: macos-latest
 
     steps:
@@ -16,9 +16,9 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '18.x'  # Update to a supported Node.js version
+        node-version: '21.x'
 
-    - name: Install Dependencies
+    - name: Install dependencies
       run: |
         npm install
         npm install -g react-native-cli
@@ -28,14 +28,81 @@ jobs:
         gem install bundler
         bundle install
 
+    - name: Install CocoaPods
+      run: |
+        cd ios
+        pod install
+
     - name: Set up App Store Connect API Key
       run: |
         echo "${{ secrets.APP_STORE_CONNECT_P8_KEY }}" > AuthKey.p8
 
-    - name: Build and Upload to TestFlight
+    - name: Build and Upload iOS to TestFlight
       run: |
         bundle exec fastlane ios build_and_upload_to_testflight
       env:
         APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
         APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
         APP_STORE_CONNECT_P8_KEY: ${{ secrets.APP_STORE_CONNECT_P8_KEY }}
+
+    - name: Build Android Release
+      run: |
+        bundle exec fastlane android release
+name: iOS Build and Upload to TestFlight
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '21.x'
+
+    - name: Install dependencies
+      run: |
+        npm install
+        cd ios
+        pod install
+
+    - name: Decrypt and install certificates and provisioning profiles
+      run: |
+        echo ${{ secrets.DEV_P12_BASE64 }} | base64 --decode > AppCheckGit_Dev.p12
+        echo ${{ secrets.DIS_P12_BASE64 }} | base64 --decode > AppCheckGit_Dis.p12
+        echo ${{ secrets.DEV_MOBILEPROVISION_BASE64 }} | base64 --decode > AppCheckGit_Dev.mobileprovision
+        echo ${{ secrets.DIS_MOBILEPROVISION_BASE64 }} | base64 --decode > AppCheckGit_Dis.mobileprovision
+
+        security create-keychain -p "" build.keychain
+        security import AppCheckGit_Dev.p12 -k ~/Library/Keychains/build.keychain -P "${{ secrets.CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign
+        security import AppCheckGit_Dis.p12 -k ~/Library/Keychains/build.keychain -P "${{ secrets.CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign
+
+        mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+        cp AppCheckGit_Dev.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+        cp AppCheckGit_Dis.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+
+        security list-keychains -s ~/Library/Keychains/build.keychain
+        security default-keychain -s ~/Library/Keychains/build.keychain
+        security unlock-keychain -p "" ~/Library/Keychains/build.keychain
+        security set-key-partition-list -S apple-tool:,apple: -s -k "" ~/Library/Keychains/build.keychain
+
+    - name: Set up Ruby and Install Fastlane
+      run: |
+        sudo gem install bundler:2.1.4
+        bundle install
+
+    - name: Build and Upload to TestFlight
+      env:
+        APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+        APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        APP_STORE_CONNECT_P8_KEY: ${{ secrets.APP_STORE_CONNECT_P8_KEY }}
+      run: |
+        bundle exec fastlane ios build_and_upload_to_testflight

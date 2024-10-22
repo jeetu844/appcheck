@@ -1,38 +1,20 @@
 default_platform(:ios)
 
 platform :ios do
-  desc "Build the app and upload to TestFlight"
-  lane :upload_to_testflight do
-    # Provide your App Store Connect API key information
-    app_store_connect_api_key(
-      key_id: "YOUR_KEY_ID",         # Replace with the Key ID from App Store Connect
-      issuer_id: "YOUR_ISSUER_ID",   # Replace with the Issuer ID from App Store Connect
-      key_filepath: "./AuthKey.p8",  # Path to your .p8 file
-      in_house: false                # Set to true if you are using an enterprise account
-    )
-
-    # Path to your .ipa file (if the build has already been done)
-    upload_to_testflight(
-      ipa: "./path_to_your_ipa/AppCheck.ipa"  # Adjust the path to your built .ipa file
-    )
-  end
-
-  desc "Build the app, create the IPA, and upload to TestFlight"
+  desc "Build and upload to TestFlight"
   lane :build_and_upload_to_testflight do
-    # Build the app using Gym and then upload it to TestFlight
+    match(type: "appstore") # Use match or other Fastlane code signing methods
+
+    # Build the app using Gym
     gym(
-      workspace: "./ios/AppCheck.xcworkspace", # Path to your Xcode workspace
-      scheme: "AppCheck",                     # Your app's scheme
-      export_method: "app-store",             # Method for app distribution (app-store, ad-hoc, etc.)
-      output_directory: "./build",            # Output directory for the build
-      output_name: "AppCheck.ipa"             # The generated .ipa file name
+      workspace: "./ios/AppCheck.xcworkspace",
+      scheme: "AppCheck",
+      export_method: "app-store",
+      output_directory: "./build",
+      output_name: "AppCheck.ipa"
     )
 
-    # Upload the built .ipa to TestFlight
-    upload_to_testflight(
-      username: "ninehtz@gmail.com",  # Optional if using App Store Connect API key
-      app_identifier: "HR7RS84V6F.com.appchekongit",    # Your app's bundle identifier
-      skip_waiting_for_build_processing: false
-    )
+    # Upload to TestFlight
+    upload_to_testflight
   end
 end
