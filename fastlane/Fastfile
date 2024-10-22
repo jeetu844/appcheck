@@ -7,11 +7,12 @@ platform :ios do
 
     # Build the app using Gym
     gym(
-      workspace: "./ios/AppCheck.xcworkspace", # Path to your Xcode workspace
-      scheme: "AppCheck",                      # Your app's scheme
-      export_method: "app-store",              # Export method (app-store, ad-hoc, etc.)
-      output_directory: "./build",             # Output directory for the IPA
-      output_name: "AppCheck.ipa"              # Name of the generated IPA
+      workspace: "./ios/AppCheck.xcworkspace",
+      scheme: "AppCheck",
+      export_method: "app-store",
+      output_directory: "./build",
+      output_name: "AppCheck.ipa",
+      timeout: 6000 # 6000 seconds = 1 hour 40 minutes
     )
 
     # Upload the build to TestFlight
