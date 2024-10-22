@@ -32,8 +32,8 @@ jobs:
         echo ${{ secrets.DIS_MOBILEPROVISION_BASE64 }} | base64 --decode > AppCheckGit_Dis.mobileprovision
 
         security create-keychain -p "" build.keychain
-        security import AppCheckGit_Dev.p12 -k ~/Library/Keychains/build.keychain -P "${{ secrets.CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign
-        security import AppCheckGit_Dis.p12 -k ~/Library/Keychains/build.keychain -P "${{ secrets.CERTIFICATE_PASSWORD }}" -T /usr/bin/codesign
+        security import AppCheckGit_Dev.p12 -k ~/Library/Keychains/build.keychain -P "intel123" -T /usr/bin/codesign
+        security import AppCheckGit_Dis.p12 -k ~/Library/Keychains/build.keychain -P "intel123" -T /usr/bin/codesign
 
         mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
         cp AppCheckGit_Dev.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
