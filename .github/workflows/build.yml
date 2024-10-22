@@ -8,22 +8,32 @@ on:
 jobs:
   build:
     runs-on: macos-latest
+    timeout-minutes: 120
 
     steps:
+    # Step 1: Checkout the repository
     - name: Checkout repository
       uses: actions/checkout@v2
 
+    # Step 2: Clean DerivedData
+    - name: Clean DerivedData
+      run: |
+        rm -rf ~/Library/Developer/Xcode/DerivedData
+
+    # Step 3: Set up Node.js
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
         node-version: '21.x'
 
+    # Step 4: Install dependencies (npm and Pods)
     - name: Install dependencies
       run: |
         npm install
         cd ios
-        pod install
+        pod install --repo-update
 
+    # Step 5: Decrypt and install certificates and provisioning profiles
     - name: Decrypt and install certificates and provisioning profiles
       run: |
         echo ${{ secrets.DEV_P12_BASE64 }} | base64 --decode > AppCheckGit_Dev.p12
@@ -44,11 +54,13 @@ jobs:
         security unlock-keychain -p "" ~/Library/Keychains/build.keychain
         security set-key-partition-list -S apple-tool:,apple: -s -k "" ~/Library/Keychains/build.keychain
 
+    # Step 6: Set up Ruby and install Fastlane
     - name: Set up Ruby and Install Fastlane
       run: |
         sudo gem install bundler:2.1.4
         bundle install
 
+    # Step 7: Build and Upload to TestFlight
     - name: Build and Upload to TestFlight
       env:
         APP_STORE_CONNECT_USERNAME: ${{ secrets.APP_STORE_CONNECT_USERNAME }}
