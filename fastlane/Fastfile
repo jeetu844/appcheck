@@ -1,30 +1,38 @@
 default_platform(:ios)
 
-before_all do
-  git_pull # Pull the latest code
-end
-
 platform :ios do
-  desc "Increment build number and version"
-  lane :update_version do
-    # Get the current plist version
-    plist_version = get_version_number_from_plist(xcodeproj: './ios/AppCheck.xcodeproj')
-    UI.message "Bumping patch version"
-    increment_version_number_in_plist(xcodeproj: './ios/AppCheck.xcodeproj', bump_type: 'patch')
+  desc "Build the app and upload to TestFlight"
+  lane :upload_to_testflight do
+    # Provide your App Store Connect API key information
+    app_store_connect_api_key(
+      key_id: "YOUR_KEY_ID",         # Replace with the Key ID from App Store Connect
+      issuer_id: "YOUR_ISSUER_ID",   # Replace with the Issuer ID from App Store Connect
+      key_filepath: "./AuthKey.p8",  # Path to your .p8 file
+      in_house: false                # Set to true if you are using an enterprise account
+    )
+
+    # Path to your .ipa file (if the build has already been done)
+    upload_to_testflight(
+      ipa: "./path_to_your_ipa/AppCheck.ipa"  # Adjust the path to your built .ipa file
+    )
   end
 
-  desc "Build the .ipa only"
-  lane :build_ipa do
-    # Increment the build number
-    increment_build_number(xcodeproj: './ios/AppCheck.xcodeproj')
-
-    # Build the .ipa using Gym
+  desc "Build the app, create the IPA, and upload to TestFlight"
+  lane :build_and_upload_to_testflight do
+    # Build the app using Gym and then upload it to TestFlight
     gym(
-      workspace: './ios/AppCheck.xcworkspace', # Path to your Xcode workspace
-      scheme: 'AppCheck', # Your app's scheme
-      export_method: 'app-store', # Method for app distribution (app-store, ad-hoc, enterprise)
-      output_directory: './build', # Output directory for the .ipa
-      output_name: 'AppCheck.ipa' # Name of the generated .ipa file
+      workspace: "./ios/AppCheck.xcworkspace", # Path to your Xcode workspace
+      scheme: "AppCheck",                     # Your app's scheme
+      export_method: "app-store",             # Method for app distribution (app-store, ad-hoc, etc.)
+      output_directory: "./build",            # Output directory for the build
+      output_name: "AppCheck.ipa"             # The generated .ipa file name
+    )
+
+    # Upload the built .ipa to TestFlight
+    upload_to_testflight(
+      username: "ninehtz@gmail.com",  # Optional if using App Store Connect API key
+      app_identifier: "HR7RS84V6F.com.appchekongit",    # Your app's bundle identifier
+      skip_waiting_for_build_processing: false
     )
   end
 end

@@ -1,4 +1,4 @@
-name: Build Android and iOS
+name: Upload iOS Build to TestFlight
 
 on:
   push:
@@ -6,53 +6,36 @@ on:
       - master
 
 jobs:
-  build-ios:
+  build-and-upload:
     runs-on: macos-latest
 
     steps:
-    - name: Checkout repository
+    - name: Checkout code
       uses: actions/checkout@v2
 
     - name: Set up Node.js
       uses: actions/setup-node@v2
       with:
-        node-version: '21.x'
+        node-version: '14.x'
 
-    - name: Install dependencies
+    - name: Install Dependencies
       run: |
         npm install
         npm install -g react-native-cli
-        cd ios
-        pod install
 
-    - name: Set up Ruby and Install Fastlane and Plugins
+    - name: Install Bundler and Fastlane
       run: |
         gem install bundler
         bundle install
-        fastlane add_plugin versioning
 
-    - name: Decode and Install Certificates
+    - name: Set up App Store Connect API Key
       run: |
-        echo "${{ secrets.P12_DIS_BASE64 }}" | base64 --decode > AppCheckGit_Dis.p12
-        echo "${{ secrets.P12_DEV_BASE64 }}" | base64 --decode > AppCheckGit_Dev.p12
-        security import AppCheckGit_Dis.p12 -k ~/Library/Keychains/login.keychain-db -P intel123 -T /usr/bin/codesign
-        security import AppCheckGit_Dev.p12 -k ~/Library/Keychains/login.keychain-db -P intel123 -T /usr/bin/codesign
+        echo "${{ secrets.APP_STORE_CONNECT_P8_KEY }}" > AuthKey.p8
 
-    - name: Update Version and Build IPA with Fastlane
+    - name: Build and Upload to TestFlight
       run: |
-        bundle exec fastlane update_version
-        bundle exec fastlane build_ipa
-
-    - name: Commit version changes
-      run: |
-        git config --global user.email "github-actions@github.com"
-        git config --global user.name "GitHub Actions"
-        git add .
-        git commit -m "Automated version bump"
-      continue-on-error: true
-
-    - name: Upload IPA to artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: ios-app
-        path: build/AppCheck.ipa
+        bundle exec fastlane ios build_and_upload_to_testflight
+      env:
+        APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+        APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        APP_STORE_CONNECT_P8_KEY: ${{ secrets.APP_STORE_CONNECT_P8_KEY }}
