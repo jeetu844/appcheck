@@ -3,16 +3,16 @@ default_platform(:ios)
 platform :ios do
   desc "Build and upload to TestFlight"
   lane :build_and_upload_to_testflight do
-    match(type: "appstore") # Ensure the certificates and profiles are in place
+    # Remove match and handle certificates manually
 
     # Build the app using Gym
     gym(
       workspace: "./ios/AppCheck.xcworkspace",
       scheme: "AppCheck",
       configuration: "Release",
-      export_method: "app-store", # Method for app distribution (e.g., app-store, ad-hoc, enterprise)
-      output_directory: "./build", # Directory to store the IPA
-      output_name: "AppCheck.ipa"   # Name of the IPA
+      export_method: "app-store",
+      output_directory: "./build",
+      output_name: "AppCheck.ipa"
     )
 
     # Upload to TestFlight
